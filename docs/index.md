@@ -17,7 +17,7 @@ _First be sure you have [MongoDB](http://www.mongodb.org/downloads) and [Node.js
 Next install Mongoose from the command line using `npm`:
 
 ```
-$ npm install mongoose --save
+$ npm install mongoose
 ```
 
 Now say we like fuzzy kittens and want to record every kitten we ever meet
@@ -29,13 +29,15 @@ connection to the `test` database on our locally running instance of MongoDB.
 // getting-started.js
 const mongoose = require('mongoose');
 
-main().catch(err => console.log(err));
+function main() {
+  mongoose.connect('mongodb://127.0.0.1:27017/test')
+  .then( console.log("Connected to database.") )
+  .catch(err => console.log(err));
 
-async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/test');
-
-  // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
+  // use `mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
 }
+
+main();
 ```
 
 For brevity, let's assume that all following code is within the `main()` function.
@@ -91,23 +93,25 @@ We have talking kittens! But we still haven't saved anything to MongoDB.
 Each document can be saved to the database by calling its [save](api/model.html#model_Model-save) method. The first argument to the callback will be an error if any occurred.
 
 ```javascript
-await fluffy.save();
-fluffy.speak();
+fluffy.save()
+.then( fluffy.speak() );
 ```
 
 Say time goes by and we want to display all the kittens we've seen.
 We can access all of the kitten documents through our Kitten [model](models.html).
 
 ```javascript
-const kittens = await Kitten.find();
-console.log(kittens);
+Kitten.find({})
+  .then(kittens => console.log(kittens))
+  .catch(error => console.log(error));
 ```
 
 We just logged all of the kittens in our db to the console.
 If we want to filter our kittens by name, Mongoose supports MongoDBs rich [querying](queries.html) syntax.
 
 ```javascript
-await Kitten.find({ name: /^fluff/ });
+Kitten.find({ name: /^fluff/ })
+.then( kittensFound => console.log(kittensFound) )
 ```
 
 This performs a search for all documents with a name property that begins
